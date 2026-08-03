@@ -3,1106 +3,667 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SECOM 반도체 공정 품질 모니터링 대시보드</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<title>진소령 · Portfolio Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary:    #4C6EF5;
-    --secondary:  #F76707;
-    --tertiary:   #12B886;
-    --quaternary: #FAB005;
-    --negative:   #E03131;
-    --neutral:    #868E96;
-    --bg:         #F4F6F9;
-    --card-bg:    #FFFFFF;
-    --text:       #212529;
-    --text-muted: #868E96;
-    --border:     #E4E8EE;
-    --sidebar-w:  260px;
-    --sidebar-bg: #1B2540;
+    --ink: #0B1F2A;
+    --ink-soft: #143447;
+    --paper: #F3F0E8;
+    --paper-2: #E8E4D8;
+    --mint: #2BB8A0;
+    --mint-deep: #1A8F7A;
+    --coral: #E85D4C;
+    --sand: #D4A574;
+    --text: #0F2430;
+    --muted: #5A6F7A;
+    --line: rgba(15, 36, 48, 0.12);
+    --glow: rgba(43, 184, 160, 0.22);
   }
+
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR",
-                 "Malgun Gothic", "맑은 고딕", sans-serif;
-    background: var(--bg);
+    min-height: 100vh;
+    font-family: "IBM Plex Sans KR", sans-serif;
     color: var(--text);
+    background:
+      radial-gradient(900px 500px at 8% -10%, rgba(43,184,160,0.18), transparent 55%),
+      radial-gradient(700px 420px at 92% 8%, rgba(232,93,76,0.12), transparent 50%),
+      radial-gradient(600px 400px at 70% 100%, rgba(212,165,116,0.14), transparent 45%),
+      linear-gradient(165deg, #EDE9DF 0%, var(--paper) 45%, #E4EFEA 100%);
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ===== 레이아웃 ===== */
-  .app {
-    display: flex;
-    min-height: 100vh;
+  .grain {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 0;
   }
 
-  /* ===== 사이드바 ===== */
-  .sidebar {
-    width: var(--sidebar-w);
-    flex-shrink: 0;
-    background: var(--sidebar-bg);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 22px 56px;
   }
-  .sidebar-brand {
-    padding: 22px 20px 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+  /* ===== Header ===== */
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 28px;
+    animation: rise 0.7s ease both;
   }
-  .sidebar-brand .brand-title {
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.35;
-    letter-spacing: -0.2px;
-  }
-  .sidebar-brand .brand-meta {
-    margin-top: 8px;
-    font-size: 11px;
-    opacity: 0.65;
-    line-height: 1.5;
-  }
-  .nav { padding: 12px 10px 24px; flex: 1; }
-  .nav-group { margin-bottom: 6px; }
-  .nav-title {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.92);
-    font-family: inherit;
-    font-size: 13px;
+  .brand-kicker {
+    font-size: 12px;
     font-weight: 600;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.15s ease;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mint-deep);
+    margin-bottom: 8px;
   }
-  .nav-title:hover { background: rgba(255,255,255,0.06); }
-  .nav-title.active { background: rgba(76,110,245,0.35); color: #fff; }
-  .nav-title .chev {
-    font-size: 10px;
-    opacity: 0.7;
-    transition: transform 0.15s ease;
+  h1 {
+    margin: 0;
+    font-family: Syne, sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
   }
-  .nav-group.open .nav-title .chev { transform: rotate(90deg); }
-  .nav-sub {
-    display: none;
-    padding: 2px 0 8px 8px;
+  h1 span { color: var(--coral); }
+  .lead {
+    margin: 10px 0 0;
+    max-width: 34em;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--muted);
   }
-  .nav-group.open .nav-sub { display: block; }
-  .nav-sub button {
-    width: 100%;
+  .header-meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .header-meta strong {
     display: block;
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.72);
-    font-family: inherit;
-    font-size: 12.5px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    text-align: left;
-    line-height: 1.35;
-    transition: all 0.15s ease;
+    font-family: Syne, sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 2px;
   }
-  .nav-sub button:hover { background: rgba(255,255,255,0.06); color: #fff; }
-  .nav-sub button.active {
-    background: var(--primary);
-    color: #fff;
+
+  /* ===== KPI strip ===== */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+    animation: rise 0.7s ease 0.08s both;
+  }
+  .kpi {
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(8px);
+  }
+  .kpi .label {
+    font-size: 12px;
+    color: var(--muted);
     font-weight: 500;
   }
-
-  /* ===== 메인 ===== */
-  .main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
+  .kpi .value {
+    margin-top: 6px;
+    font-family: Syne, sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
   }
-  .topbar {
-    background: linear-gradient(135deg, #2B3A67 0%, #4C6EF5 100%);
-    color: #fff;
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-  .topbar h1 {
-    margin: 0;
-    font-size: 20px;
-    letter-spacing: -0.3px;
-  }
-  .topbar .page-desc {
-    margin-top: 4px;
-    font-size: 12.5px;
-    opacity: 0.85;
-  }
-  .menu-toggle {
-    display: none;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: #fff;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
+  .kpi .sub {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
   }
 
-  /* ===== 필터 ===== */
-  .filter-bar {
-    background: var(--card-bg);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 32px;
+  /* ===== Toolbar ===== */
+  .toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    gap: 10px;
+    margin-bottom: 18px;
+    animation: rise 0.7s ease 0.14s both;
   }
-  .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .filter-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-muted);
-    margin-right: 2px;
-    white-space: nowrap;
+    color: var(--muted);
+    margin-right: 4px;
   }
   .chip {
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text-muted);
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.6);
+    color: var(--muted);
     border-radius: 999px;
-    padding: 6px 14px;
+    padding: 7px 14px;
     font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s ease;
     font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
   }
-  .chip:hover { border-color: var(--primary); color: var(--primary); }
+  .chip:hover { border-color: var(--mint); color: var(--ink); transform: translateY(-1px); }
   .chip.active {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--ink);
+    border-color: var(--ink);
     color: #fff;
-    font-weight: 500;
   }
-  .chip.active.bad { background: var(--negative); border-color: var(--negative); }
-  .chip.active.good { background: var(--tertiary); border-color: var(--tertiary); }
-  .reset-btn {
-    margin-left: auto;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 500;
+
+  /* ===== Layout ===== */
+  .layout {
+    display: grid;
+    grid-template-columns: 1.35fr 0.95fr;
+    gap: 18px;
+    align-items: start;
+    animation: rise 0.7s ease 0.2s both;
+  }
+
+  .project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .project {
+    width: 100%;
+    text-align: left;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.62);
+    border-radius: 16px;
+    padding: 18px 20px;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.15s ease;
+    color: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+    position: relative;
+    overflow: hidden;
   }
-  .reset-btn:hover { background: #F1F3F5; border-color: var(--neutral); }
-
-  .filter-status {
-    padding: 10px 32px 0;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  .filter-status strong { color: var(--primary); }
-
-  .content { padding-bottom: 40px; flex: 1; }
-
-  /* ===== 페이지 패널 ===== */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* ===== KPI 카드 ===== */
-  .summary-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 14px;
-    padding: 16px 32px 22px;
-  }
-  .summary-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    border-left: 4px solid var(--primary);
-  }
-  .summary-card.good { border-left-color: var(--tertiary); }
-  .summary-card.bad  { border-left-color: var(--negative); }
-  .summary-card.warn { border-left-color: var(--quaternary); }
-  .summary-card .label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-  .summary-card .value { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-  .summary-card .value .unit { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
-  .summary-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-
-  .overview-note {
-    margin: 0 32px 8px;
-    padding: 16px 18px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 13.5px;
-    line-height: 1.7;
-    color: var(--text-muted);
-  }
-  .overview-note strong { color: var(--text); }
-
-  /* ===== 차트 ===== */
-  .chart-panel {
-    padding: 16px 32px 0;
-  }
-  .chart-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px 20px 16px;
-  }
-  .chart-card h3 {
-    margin: 0 0 2px;
-    font-size: 15px;
-    font-weight: 600;
-  }
-  .chart-card .sub-title {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-  .chart-wrap { position: relative; height: 360px; }
-  .chart-wrap.tall { height: 420px; }
-  .chart-caption {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border);
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-  .empty-msg {
-    display: none;
+  .project::before {
+    content: "";
     position: absolute;
-    inset: 0;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    color: var(--text-muted);
-    background: #FAFBFC;
-    border-radius: 8px;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--accent, var(--mint));
+    opacity: 0.85;
   }
-  .empty-msg.show { display: flex; }
+  .project:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(11, 31, 42, 0.08);
+    border-color: rgba(43,184,160,0.35);
+  }
+  .project.active {
+    background: #fff;
+    border-color: var(--ink);
+    box-shadow: 0 16px 40px rgba(11, 31, 42, 0.1);
+  }
+  .project.hidden { display: none; }
 
-  /* ===== 인사이트 ===== */
-  .info-panel {
-    padding: 16px 32px 0;
+  .project-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
   }
-  .info-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px 26px;
-  }
-  .info-section h2 { margin: 0 0 12px; font-size: 16px; }
-  .info-section ul { padding-left: 18px; margin: 0; line-height: 1.85; font-size: 13.5px; }
-  .info-section li { margin-bottom: 6px; }
-  .badge {
-    display: inline-block;
+  .project-tag {
     font-size: 11px;
     font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 4px;
-    margin-right: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent, var(--mint-deep));
   }
-  .badge.red   { background: #FFF0F0; color: var(--negative); }
-  .badge.amber { background: #FFF8E1; color: #C77700; }
-  .badge.blue  { background: #EEF2FF; color: var(--primary); }
+  .project-status {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(43,184,160,0.12);
+    color: var(--mint-deep);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .project-status.repo {
+    background: rgba(232,93,76,0.12);
+    color: var(--coral);
+  }
+  .project h2 {
+    margin: 8px 0 6px;
+    font-family: Syne, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .project p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  /* ===== Detail panel ===== */
+  .detail {
+    position: sticky;
+    top: 18px;
+    border-radius: 18px;
+    background: var(--ink);
+    color: #E8F2F4;
+    padding: 26px 24px 24px;
+    min-height: 360px;
+    box-shadow: 0 24px 50px rgba(11, 31, 42, 0.28);
+    overflow: hidden;
+  }
+  .detail::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: var(--glow);
+    filter: blur(8px);
+  }
+  .detail-inner { position: relative; z-index: 1; }
+  .detail-kicker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mint);
+    margin-bottom: 10px;
+  }
+  .detail h3 {
+    margin: 0 0 12px;
+    font-family: Syne, sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .detail .desc {
+    margin: 0 0 18px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(232,242,244,0.78);
+  }
+  .detail-meta {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 13px;
+  }
+  .meta-row span:first-child { color: rgba(232,242,244,0.55); }
+  .meta-row span:last-child { font-weight: 500; text-align: right; }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.95; }
+  .btn-primary {
+    background: var(--mint);
+    color: var(--ink);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.28);
+  }
+  .btn[aria-disabled="true"] {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .highlights {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .highlights h4 {
+    margin: 0 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(232,242,244,0.5);
+  }
+  .highlights ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: rgba(232,242,244,0.82);
+  }
 
   footer {
-    text-align: center;
+    margin-top: 36px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
     font-size: 12px;
-    color: var(--text-muted);
-    padding: 24px 32px 32px;
+    color: var(--muted);
+    animation: rise 0.7s ease 0.28s both;
+  }
+  footer a {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  footer a:hover { color: var(--mint-deep); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  .sidebar-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 40;
+  @media (max-width: 860px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .layout { grid-template-columns: 1fr; }
+    .detail { position: static; }
+    header { grid-template-columns: 1fr; }
+    .header-meta { text-align: left; }
   }
-
-  @media (max-width: 900px) {
-    .sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      z-index: 50;
-      transform: translateX(-100%);
-      transition: transform 0.2s ease;
-    }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-backdrop.show { display: block; }
-    .menu-toggle { display: inline-block; }
-    .topbar, .filter-bar, .filter-status, .summary-row,
-    .chart-panel, .info-panel, .overview-note, footer {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
-    .overview-note { margin-left: 16px; margin-right: 16px; }
-    .reset-btn { margin-left: 0; }
-    .chart-wrap, .chart-wrap.tall { height: 300px; }
+  @media (max-width: 480px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .app { padding: 20px 14px 40px; }
   }
 </style>
 </head>
 <body>
-
-<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<div class="grain" aria-hidden="true"></div>
 
 <div class="app">
-  <!-- ===== 사이드바 메뉴 ===== -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-title">SECOM 반도체 공정<br>품질 모니터링</div>
-      <div class="brand-meta">11cha_secom_cleaned.csv · 25건<br>2026-06-30 08:00 ~ 2026-07-01 13:00</div>
+  <header>
+    <div>
+      <div class="brand-kicker">Educator · AI Creator</div>
+      <h1>진소령 <span>Portfolio</span> Dashboard</h1>
+      <p class="lead">
+        AI 교육·데이터 분석·웹 창작까지, 지금까지 만든 프로젝리를 한곳에서 살펴보는 포트폴리오 대시보드입니다.
+      </p>
     </div>
-
-    <nav class="nav" id="mainNav">
-      <div class="nav-group open" data-group="overview">
-        <button type="button" class="nav-title active" data-page="overview">
-          <span>모니터링 개요</span>
-        </button>
-      </div>
-
-      <div class="nav-group open" data-group="quality">
-        <button type="button" class="nav-title" data-toggle="quality">
-          <span>생산·품질 현황</span>
-          <span class="chev">▶</span>
-        </button>
-        <div class="nav-sub">
-          <button type="button" data-page="equip">설비별 생산 건수</button>
-          <button type="button" data-page="result">판정 결과 구성비</button>
-        </div>
-      </div>
-
-      <div class="nav-group open" data-group="process">
-        <button type="button" class="nav-title" data-toggle="process">
-          <span>공정 파라미터</span>
-          <span class="chev">▶</span>
-        </button>
-        <div class="nav-sub">
-          <button type="button" data-page="trend">시간대별 공정 파라미터 추이</button>
-          <button type="button" data-page="hist">챔버온도 분포</button>
-          <button type="button" data-page="range">설비별 챔버온도 범위</button>
-          <button type="button" data-page="scatter">챔버온도 × 가스유량 상관관계</button>
-        </div>
-      </div>
-
-      <div class="nav-group open" data-group="insight">
-        <button type="button" class="nav-title" data-toggle="insight">
-          <span>분석 인사이트</span>
-          <span class="chev">▶</span>
-        </button>
-        <div class="nav-sub">
-          <button type="button" data-page="findings">주요 시사점</button>
-          <button type="button" data-page="quality-notes">데이터 품질 각주</button>
-        </div>
-      </div>
-    </nav>
-  </aside>
-
-  <!-- ===== 메인 콘텐츠 ===== -->
-  <div class="main">
-    <header class="topbar">
-      <div>
-        <h1 id="pageTitle">모니터링 개요</h1>
-        <div class="page-desc" id="pageDesc">KPI 요약 · 필터로 설비·판정 조건을 선택하세요</div>
-      </div>
-      <button type="button" class="menu-toggle" id="menuToggle">메뉴</button>
-    </header>
-
-    <div class="filter-bar" id="filterBar">
-      <div class="filter-group">
-        <span class="filter-label">설비명</span>
-        <div id="equipFilters"></div>
-      </div>
-      <div class="filter-group">
-        <span class="filter-label">판정 결과</span>
-        <div id="resultFilters"></div>
-      </div>
-      <button class="reset-btn" id="resetBtn">필터 초기화</button>
+    <div class="header-meta">
+      <strong>5 Projects</strong>
+      blanciel1977-lab<br>
+      Updated Aug 2026
     </div>
+  </header>
 
-    <div class="filter-status" id="filterStatus"></div>
-
-    <div class="content">
-      <!-- 개요 -->
-      <section class="page active" id="page-overview">
-        <section class="summary-row" id="summaryRow"></section>
-        <div class="overview-note">
-          좌측 <strong>하위 메뉴</strong>에서 차트·인사이트를 선택하세요.
-          상단 필터는 모든 화면에 공통 적용됩니다.
-        </div>
-      </section>
-
-      <!-- 생산·품질 -->
-      <section class="page" id="page-equip">
-        <div class="chart-panel">
-          <div class="chart-card">
-            <h3>① 설비별 생산 건수</h3>
-            <div class="sub-title">설비명 기준 · 판정 결과 누적 (단위: 건)</div>
-            <div class="chart-wrap">
-              <canvas id="chartEquip"></canvas>
-              <div class="empty-msg" id="empty-chartEquip">선택한 조건에 해당하는 데이터가 없음</div>
-            </div>
-            <div class="chart-caption" id="capEquip"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-result">
-        <div class="chart-panel">
-          <div class="chart-card">
-            <h3>② 판정 결과 구성비</h3>
-            <div class="sub-title">양품 / 불량 비중 (단위: 건, %)</div>
-            <div class="chart-wrap">
-              <canvas id="chartResult"></canvas>
-              <div class="empty-msg" id="empty-chartResult">선택한 조건에 해당하는 데이터가 없음</div>
-            </div>
-            <div class="chart-caption" id="capResult"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 공정 파라미터 -->
-      <section class="page" id="page-trend">
-        <div class="chart-panel">
-          <div class="chart-card">
-            <h3>③ 시간대별 공정 파라미터 추이</h3>
-            <div class="sub-title">측정일시 기준 · 챔버온도(좌축, ℃) / 압력(우축, kPa)</div>
-            <div class="chart-wrap tall">
-              <canvas id="chartTrend"></canvas>
-              <div class="empty-msg" id="empty-chartTrend">선택한 조건에 해당하는 데이터가 없음</div>
-            </div>
-            <div class="chart-caption" id="capTrend"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-hist">
-        <div class="chart-panel">
-          <div class="chart-card">
-            <h3>④ 챔버온도 분포 (히스토그램)</h3>
-            <div class="sub-title">구간 폭 4.2℃ · 전체 데이터 기준 고정 구간 (단위: 건)</div>
-            <div class="chart-wrap">
-              <canvas id="chartHist"></canvas>
-              <div class="empty-msg" id="empty-chartHist">선택한 조건에 해당하는 데이터가 없음</div>
-            </div>
-            <div class="chart-caption" id="capHist"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-range">
-        <div class="chart-panel">
-          <div class="chart-card">
-            <h3>⑤ 설비별 챔버온도 범위</h3>
-            <div class="sub-title">최솟값~최댓값 구간 + 평균 마커 (단위: ℃)</div>
-            <div class="chart-wrap">
-              <canvas id="chartRange"></canvas>
-              <div class="empty-msg" id="empty-chartRange">선택한 조건에 해당하는 데이터가 없음</div>
-            </div>
-            <div class="chart-caption" id="capRange"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-scatter">
-        <div class="chart-panel">
-          <div class="chart-card">
-            <h3>⑥ 챔버온도 × 가스유량 상관관계</h3>
-            <div class="sub-title">양품/불량 색상 구분 · 전체 데이터 상관계수 r = -0.33</div>
-            <div class="chart-wrap tall">
-              <canvas id="chartScatter"></canvas>
-              <div class="empty-msg" id="empty-chartScatter">선택한 조건에 해당하는 데이터가 없음</div>
-            </div>
-            <div class="chart-caption" id="capScatter"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 인사이트 -->
-      <section class="page" id="page-findings">
-        <div class="info-panel">
-          <div class="info-section">
-            <h2>주요 시사점</h2>
-            <ul>
-              <li><span class="badge blue">불량 집중</span>불량 3건 중 2건이 <strong>CVD-01</strong>에서 발생함(해당 설비 불량률 33.3%, 전체 평균 12.0%의 약 2.8배). 다만 표본이 3건뿐이라 통계적 결론이 아닌 <strong>우선 점검 대상 선정 근거</strong>로만 활용해야 함.</li>
-              <li><span class="badge amber">이상치</span>LOT1008(CVD-01)의 챔버온도 272.2℃는 IQR 상한 265.6℃를 초과함. 해당 시점 설비 로그를 별도 확인할 필요가 있음.</li>
-              <li><span class="badge blue">상관관계</span>챔버온도와 가스유량은 약한 음의 상관(r=-0.33)을 보임. 관계가 있어 보이나 <strong>인과관계는 별도 검증이 필요함</strong> — 표본 25건으로는 판단 불가임.</li>
-              <li><span class="badge amber">불량 조건</span>불량 3건의 공정시간은 각각 64·61·59초로 전체 평균 58.96초보다 길고, 3건 모두 압력이 95~97kPa 구간에 몰려 있음. 저압·장시간 조합의 위험성을 추가 데이터로 검증할 가치가 있음.</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-quality-notes">
-        <div class="info-panel">
-          <div class="info-section">
-            <h2>데이터 품질 각주</h2>
-            <ul>
-              <li><span class="badge red">평균 대체</span><strong>압력</strong> 컬럼 3건(LOT1004·LOT1012·LOT1023)이 소수점 15자리 동일값 96.364286으로, 원본 결측값을 평균으로 대체한 흔적임. 압력 관련 해석은 신뢰도를 낮춰 볼 필요가 있음.</li>
-              <li><span class="badge red">중복 키</span><strong>LOT1003</strong>이 2행 존재함. 측정일시·측정값은 동일하나 설비명만 CVD-01 / ETCH-01로 불일치함 → 전체 행 중복이 아니라 <code>drop_duplicates()</code>로 잡히지 않음. 본 대시보드는 원본 25행을 그대로 반영함.</li>
-              <li><span class="badge amber">행 누락</span>LOT1006·1009·1010·1015·1021·1026 총 6개 LOT이 결번임(이전 전처리 단계에서 제거된 것으로 추정됨).</li>
-              <li><span class="badge amber">클래스 불균형</span>불량 3건(12.0%)으로 표본이 매우 적음. 설비별 불량률 비교는 <strong>참고 지표</strong>로만 사용해야 함.</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+  <section class="kpi-row" aria-label="요약 지표">
+    <div class="kpi">
+      <div class="label">전체 프로젝트</div>
+      <div class="value" id="kpiTotal">5</div>
+      <div class="sub">포트폴리오 수록</div>
     </div>
+    <div class="kpi">
+      <div class="label">라이브 데모</div>
+      <div class="value" id="kpiLive">4</div>
+      <div class="sub">GitHub Pages</div>
+    </div>
+    <div class="kpi">
+      <div class="label">교육·AI</div>
+      <div class="value">2</div>
+      <div class="sub">이야기책 · 퍼스널컬러</div>
+    </div>
+    <div class="kpi">
+      <div class="label">데이터 분석</div>
+      <div class="value">2</div>
+      <div class="sub">교통 · 따릉이</div>
+    </div>
+  </section>
 
-    <footer>
-      단일 HTML 파일 · Chart.js 4.4.0 (CDN) · 모든 수치는 원본 CSV 25행에서 실시간 집계됨
-    </footer>
+  <div class="toolbar" role="toolbar" aria-label="카테고리 필터">
+    <span class="filter-label">필터</span>
+    <button type="button" class="chip active" data-filter="all">전체</button>
+    <button type="button" class="chip" data-filter="education">교육·AI</button>
+    <button type="button" class="chip" data-filter="data">데이터 분석</button>
+    <button type="button" class="chip" data-filter="web">웹 서비스</button>
+    <button type="button" class="chip" data-filter="profile">프로필</button>
   </div>
+
+  <div class="layout">
+    <div class="project-list" id="projectList" role="list"></div>
+
+    <aside class="detail" aria-live="polite">
+      <div class="detail-inner" id="detailPanel"></div>
+    </aside>
+  </div>
+
+  <footer>
+    <span>단일 HTML · Portfolio Control Panel</span>
+    <span>
+      <a href="https://github.com/blanciel1977-lab" target="_blank" rel="noopener">GitHub</a>
+      ·
+      <a href="https://blanciel1977-lab.github.io/portfolio/" target="_blank" rel="noopener">본문 포트폴리오</a>
+    </span>
+  </footer>
 </div>
 
 <script>
-/* =========================================================
-   1. 원본 데이터 (11cha_secom_cleaned.csv 25행 그대로 삽입)
-   컬럼 순서: 공정ID, 측정일시, 설비명, 챔버온도, 압력, 가스유량, 공정시간, 양품여부
-   ========================================================= */
-const RAW = [
-  ["LOT1001","2026-06-30 08:00","ETCH-01",254.0, 99.3,               46.9,66,"양품"],
-  ["LOT1002","2026-06-30 09:00","ETCH-02",252.2,105.1,               43.3,57,"양품"],
-  ["LOT1003","2026-06-30 10:00","CVD-01", 251.9, 90.4,               39.8,57,"양품"],
-  ["LOT1004","2026-06-30 11:00","CVD-02", 246.6, 96.36428571428573,  42.9,51,"양품"],
-  ["LOT1005","2026-06-30 12:00","PVD-01", 250.5, 92.9,               43.4,60,"양품"],
-  ["LOT1007","2026-06-30 14:00","ETCH-02",249.9, 94.7,               47.5,55,"양품"],
-  ["LOT1008","2026-06-30 15:00","CVD-01", 272.2,106.0,               44.4,63,"양품"],
-  ["LOT1011","2026-06-30 18:00","ETCH-01",244.6,103.1,               48.1,63,"양품"],
-  ["LOT1012","2026-06-30 19:00","ETCH-02",248.3, 96.36428571428573,  40.5,64,"불량"],
-  ["LOT1013","2026-06-30 20:00","CVD-01", 241.1, 94.0,               47.4,65,"양품"],
-  ["LOT1014","2026-06-30 21:00","CVD-02", 241.7, 99.6,               47.9,63,"양품"],
-  ["LOT1016","2026-06-30 23:00","ETCH-01",238.6,105.2,               47.7,60,"양품"],
-  ["LOT1017","2026-07-01 00:00","ETCH-02",261.8, 97.4,               42.6,57,"양품"],
-  ["LOT1018","2026-07-01 01:00","CVD-01", 254.0,105.8,               45.8,61,"양품"],
-  ["LOT1019","2026-07-01 02:00","CVD-02", 250.8,104.8,               44.4,58,"양품"],
-  ["LOT1020","2026-07-01 03:00","PVD-01", 260.2, 98.5,               37.0,61,"양품"],
-  ["LOT1022","2026-07-01 05:00","ETCH-02",242.5,107.0,               44.9,53,"양품"],
-  ["LOT1023","2026-07-01 06:00","CVD-01", 250.5, 96.36428571428573,  44.4,61,"불량"],
-  ["LOT1024","2026-07-01 07:00","CVD-02", 252.7,100.0,               47.3,55,"양품"],
-  ["LOT1025","2026-07-01 08:00","PVD-01", 256.3, 95.5,               49.2,54,"양품"],
-  ["LOT1027","2026-07-01 10:00","ETCH-02",250.8, 97.5,               40.3,60,"양품"],
-  ["LOT1028","2026-07-01 11:00","CVD-01", 254.3, 95.4,               46.9,59,"불량"],
-  ["LOT1029","2026-07-01 12:00","CVD-02", 243.7, 98.4,               47.4,55,"양품"],
-  ["LOT1030","2026-07-01 13:00","PVD-01", 260.9,112.7,               44.0,59,"양품"],
-  ["LOT1003","2026-06-30 10:00","ETCH-01",251.9, 90.4,               39.8,57,"양품"]
+const PROJECTS = [
+  {
+    id: "prompt100",
+    title: "AI 활용 이야기책 만들기",
+    short: "초등학생 대상 · 명화 스타일·캐릭터·동화책 프롬프트 워크플로",
+    category: "education",
+    categoryLabel: "교육 · AI",
+    accent: "#2BB8A0",
+    status: "live",
+    statusLabel: "Live Demo",
+    stack: "HTML · 프롬프트 엔지니어링",
+    audience: "초등학생 · 교실",
+    summary: "초등학생이 AI와 함께 이야기책을 만들 수 있도록, 명화 스타일 선택부터 배경·캐릭터·4단계 동화 구성까지 단계형 프롬프트를 제공하는 교육용 웹앱입니다.",
+    highlights: [
+      "명화 스타일 카드로 그림 톤을 고름",
+      "채도·명도를 낮춘 이야기 배경 프롬프트",
+      "다각도 캐릭터 디자인 시트 생성",
+      "주인공→배경→문제→결말 4단계 동화 제작"
+    ],
+    demo: "https://blanciel1977-lab.github.io/prompt100/",
+    repo: "https://github.com/blanciel1977-lab/prompt100"
+  },
+  {
+    id: "traffic",
+    title: "교통사고 현황 분석",
+    short: "법규위반 사고다발지 지도 · 인사이트 도출",
+    category: "data",
+    categoryLabel: "데이터 분석",
+    accent: "#E85D4C",
+    status: "live",
+    statusLabel: "Live Demo",
+    stack: "HTML · 지도 시각화",
+    audience: "교통안전 · 분석 발표",
+    summary: "한반도 위·경도 기반 법규위반 사고다발지 데이터를 히트맵·클러스터·블랙맵으로 시각화하고, 중앙선침범·사망사고 중심으로 위험 구간에 대한 인사이트를 도출합니다.",
+    highlights: [
+      "6,670개 다발지점 밀도 시각화",
+      "히트맵 / 블랙맵 / 클러스터 맵",
+      "중앙선침범 + 사망사고 핵심 지도",
+      "치명도 높은 유형 중심 인사이트"
+    ],
+    demo: "https://blanciel1977-lab.github.io/traffic/",
+    repo: "https://github.com/blanciel1977-lab/traffic"
+  },
+  {
+    id: "bicycle",
+    title: "실시간 따릉이 대여상황",
+    short: "서울 공공자전거 실시간 대여·반납 현황 모니터링",
+    category: "data",
+    categoryLabel: "데이터 분석",
+    accent: "#1A8F7A",
+    status: "repo",
+    statusLabel: "GitHub",
+    stack: "실시간 데이터 · 대시보드",
+    audience: "도시 모빌리티",
+    summary: "서울 따릉이(공공자전거)의 실시간 대여 상황을 한눈에 파악할 수 있도록 구성한 프로젝트입니다. 저장소에서 코드와 진행 상황을 확인할 수 있습니다.",
+    highlights: [
+      "실시간 대여·반납 상황 모니터링",
+      "따릉이 모빌리티 데이터 활용",
+      "도시 교통·공유 이동수단 관점"
+    ],
+    demo: null,
+    repo: "https://github.com/blanciel1977-lab/bicycle"
+  },
+  {
+    id: "personal_color",
+    title: "나의 퍼스널컬러는?",
+    short: "17문항으로 찾는 12시즌 퍼스널컬러 진단",
+    category: "web",
+    categoryLabel: "웹 서비스",
+    accent: "#D4A574",
+    status: "live",
+    statusLabel: "Live Demo",
+    stack: "HTML · 퀴즈 UX",
+    audience: "일반 사용자",
+    summary: "언더톤·명도·대비·채도 축을 바탕으로 17가지 질문에 답하면, 12가지 시즌 타입 중 나에게 맞는 퍼스널컬러를 찾아주는 자가 진단 웹앱입니다.",
+    highlights: [
+      "약 3분 소요 객관식 진단",
+      "웜/쿨 · 라이트/딥 · 로우/하이 · 클리어/뮤트",
+      "12시즌 타입 결과 안내",
+      "참고용 자가 진단 UX"
+    ],
+    demo: "https://blanciel1977-lab.github.io/personal_color/",
+    repo: "https://github.com/blanciel1977-lab/personal_color"
+  },
+  {
+    id: "portfolio",
+    title: "나의 포트폴리오",
+    short: "Developer → Educator → AI Creator 여정",
+    category: "profile",
+    categoryLabel: "프로필",
+    accent: "#0B1F2A",
+    status: "live",
+    statusLabel: "Live Demo",
+    stack: "HTML · 스토리텔링",
+    audience: "채용 · 협업 · 강의",
+    summary: "진소령의 본문 포트폴리오입니다. Developer에서 Educator, AI Creator로 이어지는 여정과 Education Lab, 학교 교육 이력, AI 창작 갤러리를 소개합니다.",
+    highlights: [
+      "세 가지 정체성 스토리 (Developer / Educator / AI Creator)",
+      "Coding · AI · Maker · Creator Lab",
+      "2024–2026 학교 교육 포트폴리오",
+      "AI 창작·출판 프로젝트 소개"
+    ],
+    demo: "https://blanciel1977-lab.github.io/portfolio/",
+    repo: "https://github.com/blanciel1977-lab/portfolio"
+  }
 ];
 
-const DATA = RAW.map(r => ({
-  lot: r[0], ts: r[1], equip: r[2],
-  temp: r[3], press: r[4], gas: r[5], time: r[6], result: r[7]
-}));
+let activeId = PROJECTS[0].id;
+let filter = "all";
 
-/* =========================================================
-   2. 상수 및 유틸리티
-   ========================================================= */
-const COLORS = {
-  primary:'#4C6EF5', secondary:'#F76707', tertiary:'#12B886',
-  quaternary:'#FAB005', negative:'#E03131', neutral:'#868E96'
-};
-const EQUIPS  = ["ETCH-01","ETCH-02","CVD-01","CVD-02","PVD-01"];
-const RESULTS = ["양품","불량"];
+const listEl = document.getElementById("projectList");
+const detailEl = document.getElementById("detailPanel");
 
-const HIST_BINS = 8;
-const TEMP_MIN = Math.min(...DATA.map(d => d.temp));
-const TEMP_MAX = Math.max(...DATA.map(d => d.temp));
-const BIN_W = (TEMP_MAX - TEMP_MIN) / HIST_BINS;
+function renderList() {
+  const visible = PROJECTS.filter(p => filter === "all" || p.category === filter);
+  listEl.innerHTML = visible.map(p => `
+    <button type="button" class="project ${p.id === activeId ? "active" : ""}" data-id="${p.id}" role="listitem" style="--accent:${p.accent}">
+      <div class="project-top">
+        <span class="project-tag">${p.categoryLabel}</span>
+        <span class="project-status ${p.status === "repo" ? "repo" : ""}">${p.statusLabel}</span>
+      </div>
+      <h2>${p.title}</h2>
+      <p>${p.short}</p>
+    </button>
+  `).join("");
 
-const fmt  = (n, d = 1) => (n === null || isNaN(n)) ? '-' : Number(n).toFixed(d);
-const pct  = (n, total) => total === 0 ? '0.0' : (n / total * 100).toFixed(1);
-const mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
-const shortTs = ts => ts.slice(5, 16).replace('-', '/');
-
-const PAGE_META = {
-  overview: {
-    title: '모니터링 개요',
-    desc: 'KPI 요약 · 필터로 설비·판정 조건을 선택하세요',
-    filter: true
-  },
-  equip: {
-    title: '설비별 생산 건수',
-    desc: '설비명 기준 · 판정 결과 누적',
-    filter: true
-  },
-  result: {
-    title: '판정 결과 구성비',
-    desc: '양품 / 불량 비중',
-    filter: true
-  },
-  trend: {
-    title: '시간대별 공정 파라미터 추이',
-    desc: '챔버온도 · 압력 시계열',
-    filter: true
-  },
-  hist: {
-    title: '챔버온도 분포',
-    desc: '히스토그램 · 구간 폭 4.2℃',
-    filter: true
-  },
-  range: {
-    title: '설비별 챔버온도 범위',
-    desc: '최솟값~최댓값 + 평균',
-    filter: true
-  },
-  scatter: {
-    title: '챔버온도 × 가스유량 상관관계',
-    desc: '양품/불량 색상 구분 · r = -0.33',
-    filter: true
-  },
-  findings: {
-    title: '주요 시사점',
-    desc: '불량 집중 · 이상치 · 상관관계 요약',
-    filter: false
-  },
-  'quality-notes': {
-    title: '데이터 품질 각주',
-    desc: '평균 대체 · 중복 키 · 표본 한계',
-    filter: false
+  if (!visible.some(p => p.id === activeId) && visible[0]) {
+    activeId = visible[0].id;
   }
-};
-
-/* =========================================================
-   3. 필터 상태 관리
-   ========================================================= */
-let filterEquip  = new Set(EQUIPS);
-let filterResult = new Set(RESULTS);
-
-function getFiltered() {
-  return DATA.filter(d => filterEquip.has(d.equip) && filterResult.has(d.result));
+  renderDetail();
 }
 
-function buildChips(containerId, items, stateSet, colorClassFn) {
-  const box = document.getElementById(containerId);
-  box.innerHTML = '';
-  items.forEach(item => {
-    const btn = document.createElement('button');
-    btn.className = 'chip active' + (colorClassFn ? ' ' + colorClassFn(item) : '');
-    btn.textContent = item;
-    btn.onclick = () => {
-      if (stateSet.has(item)) {
-        if (stateSet.size > 1) stateSet.delete(item);
-      } else {
-        stateSet.add(item);
-      }
-      btn.classList.toggle('active', stateSet.has(item));
-      render();
-    };
-    box.appendChild(btn);
+function renderDetail() {
+  const p = PROJECTS.find(x => x.id === activeId) || PROJECTS[0];
+  detailEl.innerHTML = `
+    <div class="detail-kicker">${p.categoryLabel}</div>
+    <h3>${p.title}</h3>
+    <p class="desc">${p.summary}</p>
+    <div class="detail-meta">
+      <div class="meta-row"><span>기술 스택</span><span>${p.stack}</span></div>
+      <div class="meta-row"><span>대상</span><span>${p.audience}</span></div>
+      <div class="meta-row"><span>상태</span><span>${p.statusLabel}</span></div>
+    </div>
+    <div class="actions">
+      ${p.demo
+        ? `<a class="btn btn-primary" href="${p.demo}" target="_blank" rel="noopener">데모 열기 →</a>`
+        : `<span class="btn btn-primary" aria-disabled="true">데모 준비 중</span>`}
+      <a class="btn btn-ghost" href="${p.repo}" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="highlights">
+      <h4>Highlights</h4>
+      <ul>${p.highlights.map(h => `<li>${h}</li>`).join("")}</ul>
+    </div>
+  `;
+
+  listEl.querySelectorAll(".project").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.id === activeId);
   });
 }
 
-function resetFilters() {
-  filterEquip  = new Set(EQUIPS);
-  filterResult = new Set(RESULTS);
-  buildChips('equipFilters',  EQUIPS,  filterEquip);
-  buildChips('resultFilters', RESULTS, filterResult, v => v === '양품' ? 'good' : 'bad');
-  render();
-}
-
-/* =========================================================
-   4. 네비게이션
-   ========================================================= */
-function setPage(pageId) {
-  const meta = PAGE_META[pageId];
-  if (!meta) return;
-
-  document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === 'page-' + pageId));
-  document.getElementById('pageTitle').textContent = meta.title;
-  document.getElementById('pageDesc').textContent = meta.desc;
-
-  const showFilter = meta.filter;
-  document.getElementById('filterBar').style.display = showFilter ? 'flex' : 'none';
-  document.getElementById('filterStatus').style.display = showFilter ? 'block' : 'none';
-
-  document.querySelectorAll('#mainNav [data-page]').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-page') === pageId);
-  });
-
-  // 차트는 display:none 상태에서 크기가 0이 되므로, 페이지 전환 후 리사이즈
-  requestAnimationFrame(() => {
-    Object.values(charts).forEach(c => { try { c.resize(); } catch (_) {} });
-  });
-
-  closeMobileSidebar();
-}
-
-function closeMobileSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarBackdrop').classList.remove('show');
-}
-
-function initNav() {
-  const nav = document.getElementById('mainNav');
-
-  nav.querySelectorAll('[data-toggle]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const group = btn.closest('.nav-group');
-      group.classList.toggle('open');
-    });
-  });
-
-  nav.querySelectorAll('[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => setPage(btn.getAttribute('data-page')));
-  });
-
-  document.getElementById('menuToggle').onclick = () => {
-    document.getElementById('sidebar').classList.add('open');
-    document.getElementById('sidebarBackdrop').classList.add('show');
-  };
-  document.getElementById('sidebarBackdrop').onclick = closeMobileSidebar;
-}
-
-/* =========================================================
-   5. 차트 초기화
-   ========================================================= */
-Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif';
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#495057';
-
-const charts = {};
-
-charts.equip = new Chart(document.getElementById('chartEquip'), {
-  type: 'bar',
-  data: {
-    labels: EQUIPS,
-    datasets: [
-      { label: '양품', data: [], backgroundColor: COLORS.tertiary, stack: 's' },
-      { label: '불량', data: [], backgroundColor: COLORS.negative, stack: 's' }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'rect' } },
-      tooltip: {
-        callbacks: {
-          title: items => `설비: ${items[0].label}`,
-          label: ctx => {
-            const v = ctx.parsed.y;
-            const equipTotal = charts.equip.data.datasets
-              .reduce((s, ds) => s + (ds.data[ctx.dataIndex] || 0), 0);
-            return `${ctx.dataset.label}: ${v}건 (설비 내 ${pct(v, equipTotal)}%)`;
-          },
-          footer: items => {
-            const i = items[0].dataIndex;
-            const equipTotal = charts.equip.data.datasets.reduce((s, ds) => s + (ds.data[i] || 0), 0);
-            const grand = getFiltered().length;
-            return `설비 합계 ${equipTotal}건 · 전체 대비 ${pct(equipTotal, grand)}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { stacked: true, title: { display: true, text: '설비명' }, grid: { display: false } },
-      y: { stacked: true, beginAtZero: true, title: { display: true, text: '생산 건수 (건)' },
-           ticks: { stepSize: 1, precision: 0 } }
-    }
-  }
+listEl.addEventListener("click", (e) => {
+  const btn = e.target.closest(".project");
+  if (!btn) return;
+  activeId = btn.dataset.id;
+  renderDetail();
 });
 
-charts.result = new Chart(document.getElementById('chartResult'), {
-  type: 'doughnut',
-  data: {
-    labels: RESULTS,
-    datasets: [{ data: [], backgroundColor: [COLORS.tertiary, COLORS.negative], borderWidth: 2, borderColor: '#fff' }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false, cutout: '58%',
-    plugins: {
-      legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle', padding: 14 } },
-      tooltip: {
-        callbacks: {
-          label: ctx => {
-            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-            return `${ctx.label}: ${ctx.parsed}건 (${pct(ctx.parsed, total)}%)`;
-          }
-        }
-      }
-    }
-  }
-});
-
-charts.trend = new Chart(document.getElementById('chartTrend'), {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [
-      { label: '챔버온도 (℃)', data: [], yAxisID: 'y',  borderColor: COLORS.primary,
-        backgroundColor: 'rgba(76,110,245,0.10)', tension: 0.25, fill: true, pointRadius: 4, pointHoverRadius: 6 },
-      { label: '압력 (kPa)',   data: [], yAxisID: 'y1', borderColor: COLORS.secondary,
-        backgroundColor: 'transparent', tension: 0.25, borderDash: [5, 4], pointRadius: 3, pointHoverRadius: 6 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'line' } },
-      tooltip: {
-        callbacks: {
-          title: items => {
-            const i = items[0].dataIndex;
-            const row = charts.trend._rows[i];
-            return `${row.ts}  ·  ${row.lot} (${row.equip})`;
-          },
-          label: ctx => {
-            const unit = ctx.datasetIndex === 0 ? '℃' : 'kPa';
-            return `${ctx.dataset.label.split(' ')[0]}: ${fmt(ctx.parsed.y)} ${unit}`;
-          },
-          footer: items => {
-            const row = charts.trend._rows[items[0].dataIndex];
-            const total = getFiltered().length;
-            return `판정: ${row.result} · 가스유량 ${fmt(row.gas)} sccm · 공정시간 ${row.time}초\n(표시 중 ${total}건 중 1건, ${pct(1, total)}%)`;
-          }
-        }
-      }
-    },
-    scales: {
-      x:  { title: { display: true, text: '측정일시 (월/일 시:분)' }, ticks: { maxRotation: 45, minRotation: 45 } },
-      y:  { position: 'left',  title: { display: true, text: '챔버온도 (℃)' }, grid: { color: '#F1F3F5' } },
-      y1: { position: 'right', title: { display: true, text: '압력 (kPa)' }, grid: { drawOnChartArea: false } }
-    }
-  }
-});
-
-charts.hist = new Chart(document.getElementById('chartHist'), {
-  type: 'bar',
-  data: {
-    labels: Array.from({ length: HIST_BINS }, (_, i) =>
-      `${(TEMP_MIN + i * BIN_W).toFixed(1)}~${(TEMP_MIN + (i + 1) * BIN_W).toFixed(1)}`),
-    datasets: [{ label: '건수', data: [], backgroundColor: COLORS.primary, borderRadius: 3 }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          title: items => `챔버온도 구간: ${items[0].label} ℃`,
-          label: ctx => {
-            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-            return `건수: ${ctx.parsed.y}건 (${pct(ctx.parsed.y, total)}%)`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: '챔버온도 구간 (℃)' }, ticks: { maxRotation: 60, minRotation: 45, font: { size: 10 } }, grid: { display: false } },
-      y: { beginAtZero: true, title: { display: true, text: '건수 (건)' }, ticks: { stepSize: 1, precision: 0 } }
-    }
-  }
-});
-
-charts.range = new Chart(document.getElementById('chartRange'), {
-  type: 'bar',
-  data: {
-    labels: EQUIPS,
-    datasets: [
-      { label: '최솟값~최댓값 범위', data: [], backgroundColor: 'rgba(76,110,245,0.35)',
-        borderColor: COLORS.primary, borderWidth: 1, borderSkipped: false, borderRadius: 4, order: 2 },
-      { label: '평균', type: 'scatter', data: [], backgroundColor: COLORS.negative,
-        pointRadius: 6, pointStyle: 'rectRot', order: 1 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } },
-      tooltip: {
-        callbacks: {
-          title: items => `설비: ${items[0].label}`,
-          label: ctx => {
-            const s = charts.range._stats[ctx.dataIndex];
-            if (!s) return '데이터 없음';
-            if (ctx.datasetIndex === 1) return `평균: ${fmt(s.avg)} ℃`;
-            const total = getFiltered().length;
-            return [
-              `최솟값: ${fmt(s.min)} ℃ / 최댓값: ${fmt(s.max)} ℃`,
-              `범위 폭: ${fmt(s.max - s.min)} ℃`,
-              `건수: ${s.n}건 (전체 ${total}건 중 ${pct(s.n, total)}%)`
-            ];
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: '설비명' }, grid: { display: false } },
-      y: { title: { display: true, text: '챔버온도 (℃)' }, suggestedMin: 235, suggestedMax: 275 }
-    }
-  }
-});
-
-charts.scatter = new Chart(document.getElementById('chartScatter'), {
-  type: 'scatter',
-  data: {
-    datasets: [
-      { label: '양품', data: [], backgroundColor: 'rgba(18,184,134,0.75)',  pointRadius: 6, pointHoverRadius: 9 },
-      { label: '불량', data: [], backgroundColor: 'rgba(224,49,49,0.85)',   pointRadius: 8, pointHoverRadius: 11, pointStyle: 'triangle' }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } },
-      tooltip: {
-        callbacks: {
-          title: ctx => `${ctx[0].raw.lot} (${ctx[0].raw.equip})`,
-          label: ctx => [
-            `판정: ${ctx.dataset.label}`,
-            `챔버온도: ${fmt(ctx.parsed.x)} ℃`,
-            `가스유량: ${fmt(ctx.parsed.y)} sccm`
-          ],
-          footer: ctx => {
-            const total = getFiltered().length;
-            const grp = ctx[0].dataset.data.length;
-            return `${ctx[0].dataset.label} ${grp}건 · 표시 중 ${total}건 대비 ${pct(grp, total)}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { title: { display: true, text: '챔버온도 (℃)' } },
-      y: { title: { display: true, text: '가스유량 (sccm)' } }
-    }
-  }
-});
-
-/* =========================================================
-   6. 렌더링
-   ========================================================= */
-function toggleEmpty(id, isEmpty) {
-  document.getElementById('empty-' + id).classList.toggle('show', isEmpty);
-}
-
-function render() {
-  const rows  = getFiltered();
-  const total = rows.length;
-  const isEmpty = total === 0;
-
-  document.getElementById('filterStatus').innerHTML =
-    `선택 조건: 설비 <strong>${[...filterEquip].join(', ')}</strong> · 판정 <strong>${[...filterResult].join(', ')}</strong> ` +
-    `→ 전체 25건 중 <strong>${total}건</strong> (${pct(total, 25)}%) 표시 중`;
-
-  const good = rows.filter(d => d.result === '양품').length;
-  const bad  = rows.filter(d => d.result === '불량').length;
-  const cards = [
-    { cls: '',     label: '전체 건수',    value: total,                          unit: '건',
-      sub: `전체 25건 대비 ${pct(total, 25)}%` },
-    { cls: 'good', label: '양품 건수',    value: good,                           unit: '건',
-      sub: `양품률 ${pct(good, total)}%` },
-    { cls: 'bad',  label: '불량 건수',    value: bad,                            unit: '건',
-      sub: `불량률 ${pct(bad, total)}%` },
-    { cls: 'warn', label: '평균 챔버온도', value: fmt(mean(rows.map(d => d.temp))), unit: '℃',
-      sub: isEmpty ? '-' : `범위 ${fmt(Math.min(...rows.map(d => d.temp)))} ~ ${fmt(Math.max(...rows.map(d => d.temp)))}` },
-    { cls: 'warn', label: '평균 압력',     value: fmt(mean(rows.map(d => d.press)), 2), unit: 'kPa',
-      sub: '결측 3건 평균 대체 포함' },
-    { cls: '',     label: '평균 공정시간', value: fmt(mean(rows.map(d => d.time)), 2), unit: '초',
-      sub: `가동 설비 ${new Set(rows.map(d => d.equip)).size}종` }
-  ];
-  document.getElementById('summaryRow').innerHTML = cards.map(c => `
-    <div class="summary-card ${c.cls}">
-      <div class="label">${c.label}</div>
-      <div class="value">${c.value}<span class="unit">${c.unit}</span></div>
-      <div class="sub">${c.sub}</div>
-    </div>`).join('');
-
-  charts.equip.data.datasets[0].data = EQUIPS.map(e => rows.filter(d => d.equip === e && d.result === '양품').length);
-  charts.equip.data.datasets[1].data = EQUIPS.map(e => rows.filter(d => d.equip === e && d.result === '불량').length);
-  charts.equip.update();
-  toggleEmpty('chartEquip', isEmpty);
-  const topEquip = EQUIPS.map(e => ({ e, n: rows.filter(d => d.equip === e).length }))
-                         .sort((a, b) => b.n - a.n)[0];
-  document.getElementById('capEquip').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `최다 생산 설비는 ${topEquip.e}(${topEquip.n}건, ${pct(topEquip.n, total)}%)임. 불량이 특정 설비에 몰려 있다면 해당 설비의 정비 이력을 우선 점검할 필요가 있음.`;
-
-  charts.result.data.datasets[0].data = [good, bad];
-  charts.result.update();
-  toggleEmpty('chartResult', isEmpty);
-  document.getElementById('capResult').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `불량률 ${pct(bad, total)}%(${bad}건)임. 불량 표본이 5건 미만이면 비율 변동 폭이 커지므로, 누적 데이터 확보 후 재평가가 필요함.`;
-
-  const sorted = [...rows].sort((a, b) => a.ts.localeCompare(b.ts));
-  charts.trend._rows = sorted;
-  charts.trend.data.labels = sorted.map(d => shortTs(d.ts));
-  charts.trend.data.datasets[0].data = sorted.map(d => d.temp);
-  charts.trend.data.datasets[1].data = sorted.map(d => d.press);
-  charts.trend.update();
-  toggleEmpty('chartTrend', isEmpty);
-  document.getElementById('capTrend').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `${sorted.length}개 시점의 추이임. 챔버온도와 압력이 동시에 급변하는 구간은 설비 상태 변화 신호일 수 있으므로 해당 시각의 알람 로그와 대조할 필요가 있음.`;
-
-  const bins = new Array(HIST_BINS).fill(0);
-  rows.forEach(d => {
-    let idx = Math.floor((d.temp - TEMP_MIN) / BIN_W);
-    if (idx >= HIST_BINS) idx = HIST_BINS - 1;
-    if (idx < 0) idx = 0;
-    bins[idx]++;
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    filter = chip.dataset.filter;
+    renderList();
   });
-  charts.hist.data.datasets[0].data = bins;
-  charts.hist.update();
-  toggleEmpty('chartHist', isEmpty);
-  const modeIdx = bins.indexOf(Math.max(...bins));
-  document.getElementById('capHist').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `최빈 구간은 ${charts.hist.data.labels[modeIdx]}℃(${bins[modeIdx]}건, ${pct(bins[modeIdx], total)}%)임. 오른쪽 끝 구간(268.0~272.2℃)에 값이 남아 있다면 이상치 LOT1008이 포함된 상태이므로 해석에 주의가 필요함.`;
+});
 
-  const stats = EQUIPS.map(e => {
-    const t = rows.filter(d => d.equip === e).map(d => d.temp);
-    return t.length ? { min: Math.min(...t), max: Math.max(...t), avg: mean(t), n: t.length } : null;
-  });
-  charts.range._stats = stats;
-  charts.range.data.datasets[0].data = stats.map(s => s ? [s.min, s.max] : null);
-  charts.range.data.datasets[1].data = stats.map((s, i) => s ? { x: i, y: s.avg } : null);
-  charts.range.update();
-  toggleEmpty('chartRange', isEmpty);
-  const widest = stats.map((s, i) => s ? { e: EQUIPS[i], w: s.max - s.min } : null)
-                      .filter(Boolean).sort((a, b) => b.w - a.w)[0];
-  document.getElementById('capRange').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `온도 변동 폭이 가장 큰 설비는 ${widest.e}(${fmt(widest.w)}℃)임. 변동 폭이 큰 설비는 온도 제어 안정성이 낮다는 뜻이므로 PID 파라미터 재조정 검토 대상임.`;
+document.getElementById("kpiLive").textContent =
+  PROJECTS.filter(p => p.demo).length;
+document.getElementById("kpiTotal").textContent = PROJECTS.length;
 
-  charts.scatter.data.datasets[0].data = rows.filter(d => d.result === '양품')
-    .map(d => ({ x: d.temp, y: d.gas, lot: d.lot, equip: d.equip }));
-  charts.scatter.data.datasets[1].data = rows.filter(d => d.result === '불량')
-    .map(d => ({ x: d.temp, y: d.gas, lot: d.lot, equip: d.equip }));
-  charts.scatter.update();
-  toggleEmpty('chartScatter', isEmpty);
-  document.getElementById('capScatter').textContent = isEmpty ? '표시할 데이터가 없음'
-    : `챔버온도가 높을수록 가스유량이 다소 낮아지는 약한 음의 경향(r=-0.33)이 보임. 상관은 인과가 아니므로 공정 조건 변경 전 별도 실험 설계가 필요함.`;
-}
-
-/* =========================================================
-   7. 초기 실행
-   ========================================================= */
-document.getElementById('resetBtn').onclick = resetFilters;
-buildChips('equipFilters',  EQUIPS,  filterEquip);
-buildChips('resultFilters', RESULTS, filterResult, v => v === '양품' ? 'good' : 'bad');
-initNav();
-render();
+renderList();
 </script>
-
 </body>
 </html>
