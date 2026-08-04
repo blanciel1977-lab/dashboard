@@ -524,20 +524,21 @@ const PROJECTS = [
   {
     id: "bicycle",
     title: "실시간 따릉이 대여상황",
-    short: "서울 공공자전거 실시간 대여·반납 현황 모니터링",
+    short: "서울 공공자전거 실시간 대여 현황 · 지도 대시보드",
     category: "data",
     categoryLabel: "데이터 분석",
-    status: "repo",
-    statusLabel: "GitHub",
-    stack: "실시간 데이터 · 대시보드",
+    status: "live",
+    statusLabel: "Live",
+    stack: "Python · FastAPI · GitHub Pages",
     audience: "도시 모빌리티",
-    summary: "서울 따릉이(공공자전거)의 실시간 대여 상황을 한눈에 파악할 수 있도록 구성한 프로젝트입니다. 저장소에서 코드와 진행 상황을 확인할 수 있습니다.",
+    summary: "서울 따릉이 실시간 대여소 현황을 지도와 KPI로 보여주는 웹 대시보드입니다. GitHub Pages로 공개 배포되며, 약 10분마다 스냅샷이 갱신됩니다.",
     highlights: [
-      "실시간 대여·반납 상황 모니터링",
-      "따릉이 모빌리티 데이터 활용",
-      "도시 교통·공유 이동수단 관점"
+      "지도 마커 + 잔여 대수 색상 (0 / 1–4 / 5+)",
+      "대여소·이용 가능·재고 없음 KPI",
+      "검색 + 잔여 적음/많음 TOP",
+      "서울 열린데이터 API · 약 10분마다 자동 갱신"
     ],
-    demo: null,
+    demo: "https://blanciel1977-lab.github.io/bicycle/",
     repo: "https://github.com/blanciel1977-lab/bicycle"
   },
   {
