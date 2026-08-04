@@ -487,8 +487,8 @@ const PROJECTS = [
     short: "초등학생 대상 · 명화 스타일·캐릭터·동화책 프롬프트 워크플로",
     category: "education",
     categoryLabel: "교육 · AI",
-    status: "live",
-    statusLabel: "Live",
+    status: null,
+    statusLabel: null,
     stack: "HTML · 프롬프트 엔지니어링",
     audience: "초등학생 · 교실",
     summary: "초등학생이 AI와 함께 이야기책을 만들 수 있도록, 명화 스타일 선택부터 배경·캐릭터·4단계 동화 구성까지 단계형 프롬프트를 제공하는 교육용 웹앱입니다.",
@@ -507,8 +507,8 @@ const PROJECTS = [
     short: "법규위반 사고다발지 지도 · 인사이트 도출",
     category: "data",
     categoryLabel: "데이터 분석",
-    status: "live",
-    statusLabel: "Live",
+    status: null,
+    statusLabel: null,
     stack: "HTML · 지도 시각화",
     audience: "교통안전 · 분석 발표",
     summary: "한반도 위·경도 기반 법규위반 사고다발지 데이터를 히트맵·클러스터·블랙맵으로 시각화하고, 중앙선침범·사망사고 중심으로 위험 구간에 대한 인사이트를 도출합니다.",
@@ -547,8 +547,8 @@ const PROJECTS = [
     short: "17문항으로 찾는 12시즌 퍼스널컬러 진단",
     category: "web",
     categoryLabel: "웹 서비스",
-    status: "live",
-    statusLabel: "Live",
+    status: null,
+    statusLabel: null,
     stack: "HTML · 퀴즈 UX",
     audience: "일반 사용자",
     summary: "언더톤·명도·대비·채도 축을 바탕으로 17가지 질문에 답하면, 12가지 시즌 타입 중 나에게 맞는 퍼스널컬러를 찾아주는 자가 진단 웹앱입니다.",
@@ -567,8 +567,8 @@ const PROJECTS = [
     short: "Developer → Educator → AI Creator 여정",
     category: "profile",
     categoryLabel: "프로필",
-    status: "live",
-    statusLabel: "Live",
+    status: null,
+    statusLabel: null,
     stack: "HTML · 스토리텔링",
     audience: "채용 · 협업 · 강의",
     summary: "진소령의 본문 포트폴리오입니다. Developer에서 Educator, AI Creator로 이어지는 여정과 Education Lab, 학교 교육 이력, AI 창작 갤러리를 소개합니다.",
@@ -595,7 +595,9 @@ function renderList() {
     <button type="button" class="project ${p.id === activeId ? "active" : ""}" data-id="${p.id}" role="listitem">
       <div class="project-top">
         <span class="project-tag">${p.categoryLabel}</span>
-        <span class="project-status ${p.status === "repo" ? "repo" : ""}">${p.statusLabel}</span>
+        ${p.statusLabel
+          ? `<span class="project-status ${p.status === "repo" ? "repo" : ""}">${p.statusLabel}</span>`
+          : ""}
       </div>
       <h2>${p.title}</h2>
       <p>${p.short}</p>
@@ -620,7 +622,9 @@ function renderDetail() {
     <div class="detail-meta">
       <div class="meta-row"><span>기술 스택</span><span>${p.stack}</span></div>
       <div class="meta-row"><span>대상</span><span>${p.audience}</span></div>
-      <div class="meta-row"><span>상태</span><span>${p.statusLabel}</span></div>
+      ${p.statusLabel
+        ? `<div class="meta-row"><span>상태</span><span>${p.statusLabel}</span></div>`
+        : ""}
     </div>
     <div class="actions">
       ${p.demo
